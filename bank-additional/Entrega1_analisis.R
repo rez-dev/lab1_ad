@@ -56,8 +56,11 @@ sum(poblacion$pdays == '999')
 # Crear un nuevo data frame sin la variable "pdays"
 poblacion2 <- select(poblacion2, -pdays)
 
-sum(poblacion$contact == 'cellular')
 
+sum(poblacion$poutcome == 'nonexistent')
+
+set.seed(123)
+cor(poblacion2, method = "kendall")
 
 
 
@@ -67,6 +70,7 @@ sum(poblacion$contact == 'cellular')
 
 # NOTA: SON TODOS CATEÓRICOS
 unknown_count <- colSums(poblacion2 == 'unknown')
+
 
 # 330 en job
 
@@ -84,6 +88,25 @@ unknown_count <- colSums(poblacion2 == 'unknown')
 ######################### Ver el N, proporcion en la población y su tasa con respecto a y ######################
 
 ############# ESTE ANÁLISIS SE HIZO CON LAS VARIABLES QUE POSEEN MISINGS ###################
+
+
+# Visualizar datos 
+n_categorias <- length(unique(poblacion2$education))
+
+
+# Graficar las barras
+
+# Paso 1: Obtener conteos
+conteos <- table(poblacion2$education)
+
+# Paso 2: Ordenar conteos de menor a mayor
+conteos_ordenados <- sort(conteos)
+
+# Paso 3: Crear vector de colores
+colores <- rainbow(length(conteos))
+
+# Paso 4: Crear gráfico de barras
+barplot(conteos_ordenados, col = colores, main = "Niveles de educación", xlab = "Tipo", ylab = "Cantidad")
 
 # Esto sirve para la suma de 1 en base a un acategoria , ya que estos son los que me interesan para el estudio
 
@@ -179,6 +202,10 @@ marital_counts <- merge(marital_counts, y_means_d, by = "marital")
 marital_counts <- marital_counts[order(marital_counts$y_mean),]
 
 
+######*CAMBIANDO UKNOWN POR SOLTEROS *#########################
+poblacion2$marital[poblacion2$marital == "unknown"] <- "single"
+###############################################################
+
 ##################
 # Caso housing   # -> recomend: tirara uknoiwn a "no" , ya que, se parece a la tasa de contratacion y para tener una casa
 ##################              hay que hacer algo 
@@ -206,6 +233,10 @@ housing_counts <- merge(housing_counts, y_means_d, by = "housing")
 # Ordenar
 housing_counts <- housing_counts[order(housing_counts$y_mean),]
 
+
+######*CAMBIANDO UKNOWN POR NO *###############################
+poblacion2$housing[poblacion2$housing == "unknown"] <- "no"
+###############################################################
 
 
 ##################
@@ -235,6 +266,65 @@ loan_counts <- merge(loan_counts, y_means_d, by = "loan")
 loan_counts <- loan_counts[order(loan_counts$y_mean),]
 
 
+
+
+
+
+
+
+################################# ESTE CODIGO ME TIRA ERROR  EN LA LINEA ############################
+################################ 294 CON RESPECTO AL FROMATO CREO      #############################
+
+
+
+assign_numerical_values <- function(data, categorical_var, numerical_var){
+  # Convertir la variable categórica a un factor para incluir todas las categorías
+  data[, categorical_var] <- factor(data[, categorical_var])
+  
+  # Calcular la media de la variable numérica para cada categoría de la variable categórica
+  mean_vals <- aggregate(data[, numerical_var], list(data[, categorical_var]), mean)
+  
+  # Ordenar las categorías de la variable categórica en función de la media de la variable numérica
+  mean_vals_sorted <- mean_vals[order(mean_vals[,2]), ]
+  
+  # Crear un vector con los valores numéricos asignados a cada categoría en orden de la media de la variable numérica
+  numerical_vals <- 1:length(unique(data[,categorical_var]))
+  
+  # Crear un vector con los valores numéricos asignados a cada categoría en el orden original de la variable categórica
+  numerical_vals_reordered <- numerical_vals[order(match(mean_vals_sorted[,1], levels(data[, categorical_var])))]
+  
+  # Asignar los valores numéricos a la variable categórica
+  data[, paste0(categorical_var, "_num")] <- numerical_vals_reordered
+  
+  return(data)
+}
+
+########################################################################################################
+
+
+
+poblacion3 <- poblacion2
+
+assign_numerical_values(poblacion3, "loan", "y")
+
+
+poblacion3[, "loan"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Aca analice la tendencia, si las tasas se parecen debo sumarla a otra vareiable que se parezca más 
 #y tenga lógica y tambien  causalidad (eso se ve con el el step wize)
 
@@ -250,6 +340,8 @@ names(education_counts)[2] <- "count"
 
 ########### Transformación de variables categóricas ###########
 
+str(poblacion2)
+
 #Pasar variables Y, pasarla a binario
 poblacion2$y <- ifelse(poblacion2$y == "yes", 1, 0)
 
@@ -261,13 +353,19 @@ poblacion2$education <- match(poblacion2$education, unique(poblacion2$education)
 # Estudiar caso de default
 poblacion2$default <- match(poblacion2$default, unique(poblacion2$default))
 
+poblacion2$housing <- match(poblacion2$housing, unique(poblacion2$housing))
+poblacion2$loan <- match(poblacion2$loan, unique(poblacion2$loan))
+poblacion2$contact <- match(poblacion2$contact, unique(poblacion2$contact))
+poblacion2$month <- match(poblacion2$month, unique(poblacion2$month))
 
+poblacion2$day_of_week <- match(poblacion2$day_of_week, unique(poblacion2$day_of_week))
 
-
-
-
-
-
+poblacion2$poutcome <- match(poblacion2$poutcome, unique(poblacion2$poutcome))
+poblacion2$emp.var.rate <- match(poblacion2$emp.var.rate, unique(poblacion2$emp.var.rate))
+poblacion2$cons.price.idx <- match(poblacion2$cons.price.idx, unique(poblacion2$cons.price.idx))
+poblacion2$cons.conf.idx <- match(poblacion2$cons.conf.idx, unique(poblacion2$cons.conf.idx))
+poblacion2$euribor3m <- match(poblacion2$euribor3m, unique(poblacion2$euribor3m))
+poblacion2$nr.employed <- match(poblacion2$nr.employed, unique(poblacion2$nr.employed))
 ####################################
 # APLICAR MONTECARLO Y FISHER
 
