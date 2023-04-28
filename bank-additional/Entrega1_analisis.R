@@ -138,6 +138,7 @@ education_counts <- education_counts[order(-education_counts$count), ]
 education_counts$percent <- education_counts$count / sum(education_counts$count) * 100
 
 # Calcular el promedio de la variable "y" para cada categoría de la variable "education"
+poblacion2$y <- ifelse(poblacion2$y == "yes", 1, 0)
 y_means_e <- aggregate(poblacion2$y, by = list(poblacion2$education), FUN = mean)
 names(y_means_e) <- c("education", "y_mean")
 
@@ -266,18 +267,44 @@ loan_counts <- merge(loan_counts, y_means_d, by = "loan")
 loan_counts <- loan_counts[order(loan_counts$y_mean),]
 
 
+########################################################################################################
+#          SECCION PARA CASO DE LOAN
+########################################################################################################
+# 
+# 
+# # Convertir la variable categórica a un factor para incluir todas las categorías
+# poblacion3[, "loan"] <- factor(poblacion3[, "loan"])
+# 
+# # Calcular la media de la variable numérica para cada categoría de la variable categórica
+# mean_vals <- aggregate(poblacion3[, "y"], list(poblacion3[, "loan"]), mean)
+# 
+# # Ordenar las categorías de la variable categórica en función de la media de la variable numérica
+# mean_vals_sorted <- mean_vals[order(mean_vals$x, decreasing = TRUE), ]
+# 
+# # Crea los indices crecientes para asignar los indices a las variables categoricas
+# mean_vals_sorted$indice <- seq(from = 1, to = nrow(mean_vals_sorted))
+# # rownames(mean_vals_sorted) <- seq(from = 1, to = nrow(mean_vals_sorted))
+# 
+# # crea un vector con los indices ordenados
+# numeros_asignados <- mean_vals_sorted$indice
+# 
+# # cambia los valores de las categorias por los indices ordenados de mayor a menor
+# # poblacion3$new_vals <- numeros_asignados[match(poblacion$loan, mean_vals_sorted$Group.1)]
+# poblacion3$loan <- numeros_asignados[match(poblacion3$loan, mean_vals_sorted$Group.1)]
 
+# for(i in seq_along(poblacion3$loan)) {
+#   # Aquí va el código que queremos ejecutar para cada índice i
+#   print(paste("Fila", i, ": loan =", poblacion3$loan[i], ", new_vals =", poblacion3$new_vals[i]))
+# }
 
+# poblacion3 <- poblacion2
+# assign_numerical_values(poblacion3, "loan", "y")
+# poblacion3[, "loan"]
 
-
-
-
-################################# ESTE CODIGO ME TIRA ERROR  EN LA LINEA ############################
-################################ 294 CON RESPECTO AL FROMATO CREO      #############################
-
-
-
-assign_numerical_values <- function(data, categorical_var, numerical_var){
+########################################################################################################
+#         NUEVA FUNCION PARA CAMBIAR CATEGORICAS POR NUMERICAS
+########################################################################################################
+assign_numerical_values1 <- function(data, categorical_var,xd, numerical_var){
   # Convertir la variable categórica a un factor para incluir todas las categorías
   data[, categorical_var] <- factor(data[, categorical_var])
   
@@ -285,44 +312,34 @@ assign_numerical_values <- function(data, categorical_var, numerical_var){
   mean_vals <- aggregate(data[, numerical_var], list(data[, categorical_var]), mean)
   
   # Ordenar las categorías de la variable categórica en función de la media de la variable numérica
-  mean_vals_sorted <- mean_vals[order(mean_vals[,2]), ]
+  mean_vals_sorted <- mean_vals[order(mean_vals$x, decreasing = TRUE), ]
   
-  # Crear un vector con los valores numéricos asignados a cada categoría en orden de la media de la variable numérica
-  numerical_vals <- 1:length(unique(data[,categorical_var]))
+  # Crea los indices crecientes para asignar los indices a las variables categoricas
+  mean_vals_sorted$indice <- seq(from = 1, to = nrow(mean_vals_sorted))
+  # rownames(mean_vals_sorted) <- seq(from = 1, to = nrow(mean_vals_sorted))
   
-  # Crear un vector con los valores numéricos asignados a cada categoría en el orden original de la variable categórica
-  numerical_vals_reordered <- numerical_vals[order(match(mean_vals_sorted[,1], levels(data[, categorical_var])))]
+  # crea un vector con los indices ordenados
+  numeros_asignados <- mean_vals_sorted$indice
   
-  # Asignar los valores numéricos a la variable categórica
-  data[, paste0(categorical_var, "_num")] <- numerical_vals_reordered
+  # cambia los valores de las categorias por los indices ordenados de mayor a menor
+  # data$new_vals <- numeros_asignados[match(poblacion$loan, mean_vals_sorted$Group.1)]
+  xd <- numeros_asignados[match(xd, mean_vals_sorted$Group.1)]
   
-  return(data)
+  # for(i in seq_along(data$loan)) {
+  #   # Aquí va el código que queremos ejecutar para cada índice i
+  #   print(paste("Fila", i, ": loan =", data$loan[i], ", new_vals =", data$new_vals[i]))
+  # }
+  return(xd)
 }
 
-########################################################################################################
-
-
-
+# COMANDOS PARA PROBAR
 poblacion3 <- poblacion2
-
-assign_numerical_values(poblacion3, "loan", "y")
-
-
+poblacion3$loan <- assign_numerical_values1(poblacion3, "loan",poblacion3$loan, "y")
 poblacion3[, "loan"]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
 
 
 # Aca analice la tendencia, si las tasas se parecen debo sumarla a otra vareiable que se parezca más 
