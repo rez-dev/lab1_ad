@@ -213,7 +213,7 @@ poblacion2$marital[poblacion2$marital == "unknown"] <- "single"
 
 
 # Contar el número de instancias en cada categoría de la variable "housing"
-housing_table <- table(poblacion2$housing)
+housing_table <- table(poblacion$housing)
 
 # Convertir la salida en un data frame
 housing_counts <- data.frame(housing = names(housing_table), count = as.numeric(housing_table))
@@ -222,10 +222,10 @@ housing_counts <- data.frame(housing = names(housing_table), count = as.numeric(
 housing_counts <- housing_counts[order(-housing_counts$count), ]
 
 # Agregar una columna con el porcentaje de instancias para cada categoría
-housing_counts$percent <- housing_counts$count / sum(education_counts$count) * 100
+housing_counts$percent <- housing_counts$count / sum(housing_counts$count) * 100
 
 # Calcular el promedio de la variable "y" para cada categoría de la variable "housing"
-y_means_d <- aggregate(poblacion2$y, by = list(poblacion2$housing), FUN = mean)
+y_means_d <- aggregate(poblacion$y, by = list(poblacion$housing), FUN = mean)
 names(y_means_d) <- c("housing", "y_mean")
 
 # Unir las tablas de conteo y promedio por categoría de "housing"
@@ -241,8 +241,8 @@ poblacion2$housing[poblacion2$housing == "unknown"] <- "no"
 
 
 ##################
-# Caso loan      # -> evaluar si la tiro a la categoria no
-##################
+# Caso loan      # -> evaluar si la tiro a la categoria no, porque en "no" tengo 82% de no equivocarme
+##################    y el 18% de si equivcarme
 
 # Contar el número de instancias en cada categoría de la variable "loan"
 loan_table <- table(poblacion2$loan)
@@ -254,7 +254,7 @@ loan_counts <- data.frame(loan = names(loan_table), count = as.numeric(loan_tabl
 loan_counts <- loan_counts[order(-loan_counts$count), ]
 
 # Agregar una columna con el porcentaje de instancias para cada categoría
-loan_counts$percent <- loan_counts$count / sum(education_counts$count) * 100
+loan_counts$percent <- loan_counts$count / sum(loan_counts$count) * 100
 
 # Calcular el promedio de la variable "y" para cada categoría de la variable "loan"
 y_means_d <- aggregate(poblacion2$y, by = list(poblacion2$loan), FUN = mean)
@@ -265,6 +265,41 @@ loan_counts <- merge(loan_counts, y_means_d, by = "loan")
 
 # Ordenar
 loan_counts <- loan_counts[order(loan_counts$y_mean),]
+
+######*CAMBIANDO UKNOWN POR NO *###############################
+poblacion2$loan[poblacion2$loan == "unknown"] <- "no"
+###############################################################
+
+
+
+##################
+# evaluar poutcome    
+##################   
+
+# Contar el número de instancias en cada categoría de la variable "loan"
+poutcome_table <- table(poblacion2$poutcome)
+
+# Convertir la salida en un data frame
+poutcome_counts <- data.frame(poutcome = names(poutcome_table), count = as.numeric(poutcome_table))
+
+# Ordenar el data frame por el total de instancias de forma descendente
+poutcome_counts <- poutcome_counts[order(-poutcome_counts$count), ]
+
+# Agregar una columna con el porcentaje de instancias para cada categoría
+poutcome_counts$percent <- poutcome_counts$count / sum(poutcome_counts$count) * 100
+
+# Calcular el promedio de la variable "y" para cada categoría de la variable "poutcome"
+y_means_d <- aggregate(poblacion2$y, by = list(poblacion2$poutcome), FUN = mean)
+names(y_means_d) <- c("poutcome", "y_mean")
+
+# Unir las tablas de conteo y promedio por categoría de "poutcome"
+poutcome_counts <- merge(poutcome_counts, y_means_d, by = "poutcome")
+
+# Ordenar
+poutcome_counts <- poutcome_counts[order(poutcome_counts$y_mean),]
+
+
+
 
 
 ########################################################################################################
@@ -334,8 +369,36 @@ assign_numerical_values1 <- function(data, categorical_var,xd, numerical_var){
 
 # COMANDOS PARA PROBAR
 poblacion3 <- poblacion2
-poblacion3$loan <- assign_numerical_values1(poblacion3, "loan",poblacion3$loan, "y")
-poblacion3[, "loan"]
+
+#Pasar variables Y, pasarla a binario
+poblacion$y <- ifelse(poblacion$y == "yes", 1, 0)
+
+# caso job
+poblacion3$job <- assign_numerical_values1(poblacion3, "job",poblacion3$job, "y")
+# caso de marital 
+poblacion3$marital <- assign_numerical_values1(poblacion3, "marital",poblacion3$marital, "y")
+# caso de education 
+poblacion3$education <- assign_numerical_values1(poblacion3, "education",poblacion3$education, "y")
+# caso de default 
+poblacion3$default <- assign_numerical_values1(poblacion3, "default",poblacion3$default, "y")
+# caso de housing 
+poblacion3$housing <- assign_numerical_values1(poblacion3, "housing",poblacion3$housing, "y")
+# caso de contact 
+poblacion3$contact <- assign_numerical_values1(poblacion3, "contact",poblacion3$contact, "y")
+# caso de month 
+poblacion3$day_of_week <- assign_numerical_values1(poblacion3, "day_of_week",poblacion3$day_of_week, "y")
+# caso de poutcome 
+poblacion3$poutcome <- assign_numerical_values1(poblacion3, "poutcome",poblacion3$poutcome, "y")
+
+
+
+# Pasar variables chr a int
+poblacion3$emp.var.rate <- as.integer(poblacion3$emp.var.rate)
+poblacion3$cons.price.idx <- as.integer(poblacion3$cons.price.idx)
+poblacion3$cons.price.idx <- as.integer(poblacion3$cons.price.idx)
+poblacion3$nr.employed <- as.integer(poblacion3$nr.employed)
+
+
 
 ##############################################################################################################################
 ##############################################################################################################################
@@ -359,30 +422,8 @@ names(education_counts)[2] <- "count"
 
 str(poblacion2)
 
-#Pasar variables Y, pasarla a binario
-poblacion2$y <- ifelse(poblacion2$y == "yes", 1, 0)
 
-#Modificando variables categóricas a numéricas
-poblacion2$job <- match(poblacion2$job, unique(poblacion2$job))
-poblacion2$marital <- match(poblacion2$marital, unique(poblacion2$marital))
-poblacion2$education <- match(poblacion2$education, unique(poblacion2$education))
 
-# Estudiar caso de default
-poblacion2$default <- match(poblacion2$default, unique(poblacion2$default))
-
-poblacion2$housing <- match(poblacion2$housing, unique(poblacion2$housing))
-poblacion2$loan <- match(poblacion2$loan, unique(poblacion2$loan))
-poblacion2$contact <- match(poblacion2$contact, unique(poblacion2$contact))
-poblacion2$month <- match(poblacion2$month, unique(poblacion2$month))
-
-poblacion2$day_of_week <- match(poblacion2$day_of_week, unique(poblacion2$day_of_week))
-
-poblacion2$poutcome <- match(poblacion2$poutcome, unique(poblacion2$poutcome))
-poblacion2$emp.var.rate <- match(poblacion2$emp.var.rate, unique(poblacion2$emp.var.rate))
-poblacion2$cons.price.idx <- match(poblacion2$cons.price.idx, unique(poblacion2$cons.price.idx))
-poblacion2$cons.conf.idx <- match(poblacion2$cons.conf.idx, unique(poblacion2$cons.conf.idx))
-poblacion2$euribor3m <- match(poblacion2$euribor3m, unique(poblacion2$euribor3m))
-poblacion2$nr.employed <- match(poblacion2$nr.employed, unique(poblacion2$nr.employed))
 ####################################
 # APLICAR MONTECARLO Y FISHER
 
