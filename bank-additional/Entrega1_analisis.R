@@ -56,7 +56,7 @@ sum(is.na(poblacion))
 #Eliminar la variable pdays
 sum(poblacion$pdays == '999')
 # Crear un nuevo data frame sin la variable "pdays"
-poblacion2 <- select(poblacion2, -pdays)
+poblacion2 <- dplyr::select(poblacion2, -pdays)
 
 
 sum(poblacion$poutcome == 'nonexistent')
@@ -169,7 +169,6 @@ education_counts <- education_counts[order(-education_counts$count), ]
 education_counts$percent <- education_counts$count / sum(education_counts$count) * 100
 
 # Calcular el promedio de la variable "y" para cada categoría de la variable "education"
-poblacion2$y <- ifelse(poblacion2$y == "yes", 1, 0)
 y_means_e <- aggregate(poblacion2$y, by = list(poblacion2$education), FUN = mean)
 names(y_means_e) <- c("education", "y_mean")
 
@@ -369,9 +368,6 @@ str(poblacion2)
 # 3era copia de l base de datos
 poblacion3 <- poblacion2
 
-#Pasar variables Y, pasarla a binario
-poblacion$y <- ifelse(poblacion$y == "yes", 1, 0)
-
 # caso job
 poblacion3$job <- assign_numerical_values1(poblacion3, "job",poblacion3$job, "y")
 # caso de marital 
@@ -432,7 +428,7 @@ for (i in 1:nrow(selected_vars)) {
 # SE ELININA: cons.price.idx para evitar multicoleanilidad
 
 # Crear un nuevo data frame sin la variable "cons.price.idx"
-poblacion4 <- select(poblacion3, -cons.price.idx)
+poblacion4 <- dplyr::select(poblacion3, -cons.price.idx)
 
 # regresión logistica
 
